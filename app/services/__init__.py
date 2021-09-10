@@ -36,16 +36,13 @@ def connect_to_db(commands: str, fetch_data: bool = False, data_entry: tuple = (
 
         if html_method == 'get' or html_method == 'patch':
             return "table doesn't exist"
-
     try:   
         cur.execute(commands, data_entry)
-
 
     except psycopg2.IntegrityError as e:
         assert isinstance(e, UniqueViolation)
         return "anime already exists"
-
-    
+ 
     if fetch_data:
         getting_data = cur.fetchall()
         FIELDNAMES = ["id", "anime", "released_date", "seasons"]
@@ -65,14 +62,12 @@ def connect_to_db(commands: str, fetch_data: bool = False, data_entry: tuple = (
 
     
 def get_all():
-
     command = """SELECT * FROM animes """
 
     return connect_to_db(command, True, (), 'get')
 
 
 def post_one(data):
-
     data['anime'].title()
     
     command = """
@@ -109,7 +104,6 @@ def get_specific_id(id: int):
     SELECT * FROM animes WHERE id=(%s)
     
     """
-
     data_entry = (id,)
 
     return connect_to_db(command, True, data_entry, 'get')
@@ -127,7 +121,6 @@ def patch_one(id : int, data: dict):
     data_id = anime_info['id']
 
     del anime_info['id']
-
   
     for key in keys:
         anime_info[key] = data[key]
@@ -141,7 +134,6 @@ def patch_one(id : int, data: dict):
     
     WHERE
     id=(%s)
-    
     """
 
     data_entry = (anime_info['anime'],anime_info['released_date'],anime_info['seasons'],id,)
@@ -167,11 +159,9 @@ def delete_one(id):
     WHERE
         id=(%s)
     RETURNING *;
-    
     """
 
     data_entry = (id,)
-
     connect_to_db(command, False, data_entry, 'delete')
 
     return ""
