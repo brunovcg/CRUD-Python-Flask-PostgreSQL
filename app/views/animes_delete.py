@@ -1,8 +1,17 @@
 from flask import Blueprint
+from app.services import delete_one
 
 bp_animes = Blueprint('animes_delete', __name__, url_prefix='/')
 
 # Em vez de @app, utilizamos a instancia de blueprint criada, bp_hello
 @bp_animes.delete('/animes/<int:anime_id>')
 def delete(anime_id):
-    return {'data': anime_id}, 200
+
+
+    result = delete_one(anime_id)
+
+    if result == 'Not Found':
+        return {'error':'Not Found'}, 404
+
+
+    return result, 200

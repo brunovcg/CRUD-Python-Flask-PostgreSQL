@@ -38,7 +38,7 @@ def connect_to_db(commands: str, fetch_data: bool = False, data_entry: tuple = (
             return "table doesn't exist"
 
     try:   
-        cur.execute(f'{commands}', data_entry)
+        cur.execute(commands, data_entry)
 
 
     except psycopg2.IntegrityError as e:
@@ -116,12 +116,62 @@ def get_specific_id(id: int):
 
 
 def patch_one(id : int, data: dict):
+
+    keys = data.keys()
     
+    try:
+        anime_info = get_specific_id(id)[0]
+    except IndexError:
+        return 'Not Found'
+
+    data_id = anime_info['id']
+
+    del anime_info['id']
+
+  
+    for key in keys:
+        anime_info[key] = data[key]
+
     command = """
-    SELECT * FROM animes WHERE id=(%s)
+    UPDATE animes 
+    SET
+        anime=(%s),
+        released_date=(%s),
+        seasons=(%s)
+    
+    WHERE
+    id=(%s)
+    
+    """
+
+    data_entry = (anime_info['anime'],anime_info['released_date'],anime_info['seasons'],id,)
+
+    connect_to_db(command, False, data_entry, 'patch')
+
+    anime_info['id'] = data_id
+
+    return anime_info
+
+
+def delete_one(id):
+
+    teste_id = get_specific_id(id)
+
+    if teste_id == []:
+        return 'Not Found'
+
+    command = """ 
+    DELETE 
+    FROM
+        animes
+    WHERE
+        id=(%s)
+    RETURNING *;
     
     """
 
     data_entry = (id,)
 
-    return connect_to_db(command, True, data_entry, 'patch')
+    connect_to_db(command, False, data_entry, 'delete')
+
+    return ""
